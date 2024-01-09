@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>welcome to the matrix</title>
+
+    <!-- Your CSS styles go here -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden; /* Hide overflow to prevent scrollbars */
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Use Monospace as a generic fixed-width font */
+        body, canvas {
+            font-family: Monospace, monospace;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- Your canvas element goes here -->
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- Your JavaScript code for drawing on the canvas goes here -->
+    <script>
+        // Initialising the canvas
+        var canvas = document.getElementById('matrixCanvas'),
+            ctx = canvas.getContext('2d');
+
+        // Setting the width and height of the canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Setting up the characters using all printable ASCII and extended ASCII characters
+        var letters = '';
+        for (var i = 32; i <= 255; i++) {
+            letters += String.fromCharCode(i);
+        }
+
+        var lettersArray = letters.split('');
+
+        // Include the cursor block character in the characters array
+        lettersArray.push('\u2588'); // Unicode character for a solid block (cursor block)
+
+        // Setting up the columns
+        var fontSize = 12; // Decrease font size
+        var cursorBlockPercentage = 0.1; // Change cursor block percentage to 0.1 percent
+        var slowDropPercentage = 20; // Decreased percentage of the time the drop is slow to make it 80% fast
+        var fastDropSpeedRange = [40, 80]; // Range for fast drop speed
+        var slowDropSpeedRange = [80, 150]; // Range for slow drop speed
+        var dropSpeed = getRandomSpeed(); // Initial randomized drop speed
+        var columns = canvas.width / fontSize;
+
+        // Setting up the drops
+        var drops = [];
+        for (var i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        // Setting up the draw function
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, .1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < drops.length; i++) {
+                var text = (Math.random() > (100 - cursorBlockPercentage) / 100) ? '\u2588' : lettersArray[Math.floor(Math.random() * lettersArray.length)]; // Include the cursor block character based on the specified percentage
+                var color = (text === '\u2588' && drops[i] * fontSize >= canvas.height) ? '#fff' : '#0f0'; // Change color to white if it's the last dropped character
+                ctx.fillStyle = color;
+                ctx.font = fontSize + 'px Monospace, monospace'; // Set the font size and family
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > (100 - slowDropPercentage) / 100) {
+                    drops[i] = 0;
+                } else {
+                    drops[i]++;
+                }
+            }
+        }
+
+        // Function to get a random drop speed, with variable probabilities for slow and fast drops
+        function getRandomSpeed() {
+            return Math.random() > (100 - slowDropPercentage) / 100 ? Math.floor(Math.random() * (slowDropSpeedRange[1] - slowDropSpeedRange[0] + 1) + slowDropSpeedRange[0]) :
+                Math.floor(Math.random() * (fastDropSpeedRange[1] - fastDropSpeedRange[0] + 1) + fastDropSpeedRange[0]);
+        }
+
+        // Loop the animation
+        setInterval(function () {
+            draw();
+            dropSpeed = getRandomSpeed(); // Update drop speed periodically
+        }, dropSpeed);
+    </script>
+
+</body>
+
+</html>
